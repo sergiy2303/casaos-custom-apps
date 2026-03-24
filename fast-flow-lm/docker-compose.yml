@@ -1,0 +1,66 @@
+name: fast-flow-lm
+
+services:
+  fast-flow-lm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fast-flow-lm:latest
+    container_name: fast-flow-lm
+    command: ["flm", "serve", "gemma3:4b", "--host", "0.0.0.0"]
+    restart: unless-stopped
+    ports:
+      - target: 52625
+        published: "8002"
+        protocol: tcp
+    devices:
+      - /dev/accel/accel0:/dev/accel/accel0
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - type: bind
+        source: /DATA/AppData/fast-flow-lm/flm
+        target: /root/.config/flm
+
+x-casaos:
+  main: fast-flow-lm
+  store_app_id: fast-flow-lm
+  category: AI
+  author: sergiy2303
+  developer: sergiy2303
+  icon: https://raw.githubusercontent.com/sergiy2303/casaos-custom-apps/main/fast-flow-lm/icon.png
+  title:
+    en_us: FastFlowLM
+  description:
+    en_us: |
+      Run LLMs directly on the AMD Ryzen AI NPU using FastFlowLM.
+      Provides an OpenAI-compatible API on port 8002.
+      Requires AMD Ryzen AI 300/400-series processor with XDNA 2 NPU and host NPU drivers installed.
+  tagline:
+    en_us: NPU-accelerated LLM inference via FastFlowLM
+  tips:
+    before_install:
+      en_us: |
+        ⚠️ Host prerequisites:
+        1. AMD Ryzen AI 300/400-series CPU with XDNA 2 NPU
+        2. NPU kernel driver installed (amdxdna-dkms)
+        3. XRT user-space library installed (libxrt-npu2)
+        4. /dev/accel/accel0 must be accessible
+        5. memlock set to unlimited in /etc/security/limits.conf
+        6. Build the image first: docker build -t fast-flow-lm .
+  port_map: "8002"
+  scheme: http
+  hostname: ""
+  index: /v1/models
+  architectures:
+    - amd64
+  volumes:
+    - container: /root/.config/flm
+      description:
+        en_us: FastFlowLM config & model cache — stores NPU-compiled model artifacts
+  devices:
+    - container: /dev/accel/accel0
+      description:
+        en_us: AMD Ryzen AI NPU accelerator device
