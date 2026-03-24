@@ -4,7 +4,7 @@ Run local LLMs with [Lemonade Server](https://lemonade-server.ai/) — an OpenAI
 
 ## Features
 
-- **OpenAI-compatible API** — drop-in replacement at `http://<host>:8080/api/v1`
+- **OpenAI-compatible API** — drop-in replacement at `http://<host>:8003/api/v1`
 - **Multiple backends** — Vulkan GPU, ROCm, or CPU via llama.cpp
 - **Model management** — pull models from the Lemonade registry or bring your own GGUF files
 - **ASR support** — speech-to-text via whisper.cpp
@@ -64,10 +64,10 @@ Load a model and start chatting:
 
 ```bash
 # List available models
-curl http://localhost:8080/api/v1/models
+curl http://localhost:8003/api/v1/models
 
 # Chat completion
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:8003/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "Qwen3-0.6B-GGUF", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
@@ -81,7 +81,7 @@ Configure the server by editing the `environment` section in `docker-compose.yml
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `LEMONADE_HOST` | Bind address | `0.0.0.0` |
-| `LEMONADE_PORT` | Server port | `8080` |
+| `LEMONADE_PORT` | Server port | `8003` |
 | `LEMONADE_API_KEY` | API key for authentication (recommended for network access) | *(none)* |
 | `LEMONADE_LLAMACPP` | llama.cpp backend: `vulkan`, `rocm`, or `cpu` | auto-detect |
 | `LEMONADE_CTX_SIZE` | Context window size | model default |
@@ -101,7 +101,7 @@ environment:
 Then include the key as a Bearer token in all requests:
 
 ```bash
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:8003/v1/chat/completions \
   -H "Authorization: Bearer your-random-secret-key" \
   -H "Content-Type: application/json" \
   -d '{"model": "Qwen3-0.6B-GGUF", "messages": [{"role": "user", "content": "Hello!"}]}'

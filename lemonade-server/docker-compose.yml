@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
     ports:
       - target: 8080
-        published: "8080"
+        published: "8003"
         protocol: tcp
     devices:
       - /dev/accel/accel0:/dev/accel/accel0
@@ -21,10 +21,14 @@ services:
         hard: -1
     environment:
       - LEMONADE_HOST=0.0.0.0
+      - LEMONADE_PORT=8080
       # - LEMONADE_API_KEY=your-secret-key-here
       # - LEMONADE_LLAMACPP=vulkan
       # - LEMONADE_CTX_SIZE=4096
     volumes:
+      - type: bind
+        source: /DATA/AppData/lemonade-server/models
+        target: /root/.cache/huggingface
       - type: bind
         source: /DATA/AppData/lemonade-server/cache
         target: /root/.cache/lemonade
@@ -52,16 +56,19 @@ x-casaos:
         1. git clone https://github.com/sergiy2303/casaos-custom-apps.git
         2. cd casaos-custom-apps/lemonade-server
         3. docker build -t lemonade-server .
-  port_map: "8080"
+  port_map: "8003"
   scheme: http
   hostname: ""
   index: /api/v1/models
   architectures:
     - amd64
   volumes:
+    - container: /root/.cache/huggingface
+      description:
+        en_us: Hugging Face model cache — stores downloaded LLM models
     - container: /root/.cache/lemonade
       description:
-        en_us: Lemonade Server cache — stores downloaded models and configuration
+        en_us: Lemonade Server cache — stores configuration and backend binaries
   devices:
     - container: /dev/accel/accel0
       description:
