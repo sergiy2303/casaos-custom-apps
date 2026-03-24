@@ -9,6 +9,7 @@ Each subdirectory contains a self-contained app with its own `docker-compose.yml
 | App | Description | Status |
 |-----|-------------|--------|
 | [FastFlowLM](fast-flow-lm/) | NPU-accelerated LLM inference on AMD Ryzen AI processors via [FastFlowLM](https://github.com/FastFlowLM/FastFlowLM) | ✅ Ready |
+| [Lemonade Server](lemonade-server/) | Local LLM inference with OpenAI-compatible API via [Lemonade Server](https://lemonade-server.ai/) | ✅ Ready |
 
 ## How to Install
 

@@ -1,0 +1,71 @@
+name: lemonade-server
+
+services:
+  lemonade-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lemonade-server:latest
+    container_name: lemonade-server
+    restart: unless-stopped
+    ports:
+      - target: 8080
+        published: "8080"
+        protocol: tcp
+    devices:
+      - /dev/accel/accel0:/dev/accel/accel0
+      - /dev/dri:/dev/dri
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    environment:
+      - LEMONADE_HOST=0.0.0.0
+      # - LEMONADE_API_KEY=your-secret-key-here
+      # - LEMONADE_LLAMACPP=vulkan
+      # - LEMONADE_CTX_SIZE=4096
+    volumes:
+      - type: bind
+        source: /DATA/AppData/lemonade-server/cache
+        target: /root/.cache/lemonade
+
+x-casaos:
+  main: lemonade-server
+  store_app_id: lemonade-server
+  category: AI
+  author: sergiy2303
+  developer: sergiy2303
+  icon: https://raw.githubusercontent.com/sergiy2303/casaos-custom-apps/main/lemonade-server/icon.png
+  title:
+    en_us: Lemonade Server
+  description:
+    en_us: |
+      Run local LLMs with Lemonade Server — an OpenAI-compatible API server.
+      Supports Vulkan GPU acceleration and CPU inference via llama.cpp.
+      Pull models from the Lemonade registry or bring your own GGUF models.
+  tagline:
+    en_us: Local LLM inference with OpenAI-compatible API
+  tips:
+    before_install:
+      en_us: |
+        ℹ️ Build the Docker image before importing:
+        1. git clone https://github.com/sergiy2303/casaos-custom-apps.git
+        2. cd casaos-custom-apps/lemonade-server
+        3. docker build -t lemonade-server .
+  port_map: "8080"
+  scheme: http
+  hostname: ""
+  index: /api/v1/models
+  architectures:
+    - amd64
+  volumes:
+    - container: /root/.cache/lemonade
+      description:
+        en_us: Lemonade Server cache — stores downloaded models and configuration
+  devices:
+    - container: /dev/accel/accel0
+      description:
+        en_us: AMD Ryzen AI NPU accelerator device
+    - container: /dev/dri
+      description:
+        en_us: GPU rendering devices (Vulkan)
