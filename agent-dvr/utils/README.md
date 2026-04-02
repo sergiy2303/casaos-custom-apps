@@ -86,7 +86,7 @@ Batch mode uses multiple worker processes for faster conversion. By default it u
 
 ```bash
 # Use 16 parallel workers
-python3 tuya_media_to_mp4.py /path/to/sd_card/ --workers 16
+python3 tuya_media_to_mp4.py /path/to/sd_card/ --workers 16 --force
 ```
 
 Progress is displayed with a files/second rate and ETA:
@@ -167,4 +167,52 @@ Some recordings are silent (the camera mic picks up no sound). The audio track w
 Try `python` instead of `python3` on Windows:
 ```powershell
 python tuya_media_to_mp4.py recording.media
+```
+
+---
+
+# PhotoPrism Metadata Updater
+
+A batch script to extract UNIX timestamps from directory names and apply them as internal EXIF/QuickTime metadata for PhotoPrism compatibility.
+
+## Background
+
+Some security camera solutions organize video files into folders named with UNIX timestamps (e.g., `1756868519_0060/0000.mp4`). PhotoPrism requires accurate internal metadata (`CreateDate`) or file system modification dates to place videos correctly in the timeline. 
+
+This script (`update_video_metadata.py`) addresses this by scanning large directories (up to 100k+ files), extracting the timestamps from the folder path, and securely writing them into the MP4 file metadata using `exiftool`.
+
+## Dependencies
+
+### Python 3
+Requires Python 3. No external Python packages via `pip` are needed.
+
+### ExifTool
+Required to natively and losslessly rewrite header timestamps inside the video files. Without this, the script will only fall back to updating the file modification time (`os.utime`).
+
+**Linux (Debian/Ubuntu):**
+```bash
+sudo apt install libimage-exiftool-perl
+```
+
+**macOS:**
+```bash
+brew install exiftool
+```
+
+## Usage
+
+Run the script by pointing to the root target folder containing the videos:
+
+```bash
+python3 update_video_metadata.py /DATA/Gallery/Camera
+```
+
+### Performance & Scale
+
+Updating 120,000 files one by one with `exiftool` is extremely slow. To solve this, the script generates intermediary CSV files and runs `exiftool` in batch mode. This allows it to process large sets (by default 5,000 files per run) in a matter of a few minutes, turning a 20+ hour task into a brief background job.
+
+You can modify the internal batch chunk size:
+```bash
+# Process 10,000 files per batch
+python3 update_video_metadata.py /DATA/Gallery/Camera --batch-size 10000
 ```
