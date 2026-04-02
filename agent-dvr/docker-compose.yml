@@ -1,0 +1,96 @@
+name: agent-dvr
+
+services:
+  agent-dvr:
+    image: ghcr.io/mekayelanik/ispyagentdvr:latest
+    container_name: agent-dvr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - AGENTDVR_WEBUI_PORT=8090
+      - TZ=Europe/Kyiv
+    ports:
+      - target: 8090
+        published: "8090"
+        protocol: tcp
+      - target: 3478
+        published: "3478"
+        protocol: udp
+      - target: 50000-50100
+        published: "50000-50100"
+        protocol: udp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/agent-dvr/config
+        target: /AgentDVR/Media/XML
+      - type: bind
+        source: /DATA/AppData/agent-dvr/recordings
+        target: /AgentDVR/Media/WebServerRoot/Media
+      - type: bind
+        source: /DATA/AppData/agent-dvr/models
+        target: /AgentDVR/Media/Models
+      - type: bind
+        source: /DATA/AppData/agent-dvr/commands
+        target: /AgentDVR/Commands
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/card0:/dev/dri/card0
+      - /dev/kfd:/dev/kfd
+
+x-casaos:
+  main: agent-dvr
+  store_app_id: agent-dvr
+  category: Surveillance
+  author: sergiy2303
+  developer: iSpy / MekayelAnik
+  icon: https://raw.githubusercontent.com/sergiy2303/casaos-custom-apps/main/agent-dvr/icon.png
+  title:
+    en_us: Agent DVR
+  description:
+    en_us: |
+      iSpy Agent DVR — cross-platform video surveillance solution with
+      hardware-accelerated encoding/decoding via AMD GPU (VAAPI).
+      Supports IP cameras, ONVIF, RTSP, and local USB devices.
+      Includes AI-powered motion detection, object recognition, and alerting.
+  tagline:
+    en_us: Video surveillance with AMD GPU hardware encoding
+  tips:
+    before_install:
+      en_us: |
+        ⚠️ Host prerequisites for AMD GPU acceleration:
+        1. AMD GPU or iGPU with VAAPI support
+        2. Mesa drivers installed on the host
+        3. /dev/dri/renderD128, /dev/dri/card0, and /dev/kfd must be accessible
+        4. Use image version 5.3.5.0 or newer for GPU HW-Acceleration
+        5. After first start, wait ~30 seconds before opening the WebUI
+  port_map: "8090"
+  scheme: http
+  hostname: ""
+  index: /
+  architectures:
+    - amd64
+    - arm64
+  volumes:
+    - container: /AgentDVR/Media/XML
+      description:
+        en_us: Agent DVR configuration files
+    - container: /AgentDVR/Media/WebServerRoot/Media
+      description:
+        en_us: Surveillance recordings storage
+    - container: /AgentDVR/Media/Models
+      description:
+        en_us: AI model files for object detection
+    - container: /AgentDVR/Commands
+      description:
+        en_us: Custom Agent DVR commands
+  devices:
+    - container: /dev/dri/renderD128
+      description:
+        en_us: AMD GPU render device for hardware encoding
+    - container: /dev/dri/card0
+      description:
+        en_us: AMD GPU card device
+    - container: /dev/kfd
+      description:
+        en_us: AMD KFD (Kernel Fusion Driver) device for ROCm/compute
